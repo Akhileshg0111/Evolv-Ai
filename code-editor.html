@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolv - Advanced Code Compiler</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css">
+    <style>
+      :root {
+    --primary-blue: #3b82f6;
+    --dark-blue: #1e40af;
+    --light-blue: #93c5fd;
+    --navy-blue: #1e293b;
+    --sky-blue: #0ea5e9;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --border-light: #e2e8f0;
+    --border-medium: #cbd5e1;
+    --success-color: #22c55e;
+    --error-color: #ef4444;
+    --warning-color: #f59e0b;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    max-width: 100vw;
+}
+
+.sidebar {
+    width: 320px;
+    background: var(--bg-primary);
+    border-right: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+}
+
+.sidebar-header {
+    padding: 24px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--sky-blue));
+    color: white;
+}
+
+.app-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.025em;
+}
+
+.app-subtitle {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.sidebar-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.section {
+    margin-bottom: 24px;
+}
+
+.section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+select, input, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+select:focus, input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--dark-blue);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-medium);
+}
+
+.btn-secondary:hover {
+    background: var(--border-light);
+}
+
+.btn-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.practice-section {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+}
+
+.practice-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.practice-info-item {
+    background: var(--bg-primary);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    text-align: center;
+}
+
+.practice-info-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.practice-info-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.editor-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.workspace {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    min-height: 0;
+}
+
+.editor-panel, .output-panel, .question-panel {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.question-panel {
+    grid-column: span 2;
+    max-height: 300px;
+    min-height: 250px;
+}
+
+.panel-header {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.panel-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.panel-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    order: 1;
+}
+
+.CodeMirror {
+    flex: 1;
+    height: auto !important;
+    font-size: 14px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+.CodeMirror-gutters {
+    background: var(--bg-secondary) !important;
+    border-right: 1px solid var(--border-light) !important;
+}
+
+.CodeMirror-linenumber {
+    color: var(--text-muted) !important;
+}
+
+.CodeMirror-cursor {
+    border-left: 2px solid var(--primary-blue) !important;
+}
+
+.CodeMirror-selected {
+    background: rgba(59, 130, 246, 0.1) !important;
+}
+
+.stdin-section {
+    padding: 16px 20px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    margin-top: auto;
+    flex-shrink: 0;
+    order: 2;
+}
+
+.stdin-input {
+    width: 100%;
+    min-height: 60px;
+    resize: vertical;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+}
+
+.output-content {
+    flex: 1;
+    padding: 20px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    color: var(--text-primary);
+}
+
+.loading-state {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 40px;
+    color: var(--text-muted);
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border-light);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+}
+
+.question-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(300px - 60px); 
+}
+
+.question-card {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    margin-bottom: 16px;
+    overflow: visible;
+}
+
+.question-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.question-difficulty {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.difficulty-beginner {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success-color);
+}
+
+.difficulty-intermediate {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.difficulty-advanced {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+}
+
+.question-description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+}
+
+.question-example {
+    background: var(--bg-primary);
+    border-radius: 6px;
+    padding: 12px;
+    border: 1px solid var(--border-light);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+    font-size: 0.8125rem;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-light);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--primary-blue), var(--sky-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.ai-input {
+    width: 100%;
+    min-height: 100px;
+    margin-bottom: 16px;
+    resize: vertical;
+}
+
+.ai-response {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    margin-top: 16px;
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1024px) {
+    .workspace {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .question-panel {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        max-height: 300px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-light);
+    }
+    
+    .workspace {
+        padding: 16px;
+    }
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-success {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success-color);
+}
+
+.status-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+}
+
+.status-running {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary-blue);
+}
+
+.practice-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 8px;
+    background: var(--bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+}
+
+.stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.stat-label {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="app-title">Evolv</h1>
+                <p class="app-subtitle">Advanced Code Compiler & Practice</p>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="section">
+                    <h3 class="section-title">Coding Environment</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Programming Language</label>
+                        <select id="language">
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="c">C</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="go">Go</option>
+                            <option value="rust">Rust</option>
+                            <option value="ruby">Ruby</option>
+                            <option value="php">PHP</option>
+                            <option value="kotlin">Kotlin</option>
+                        </select>
+                    </div>
+                    
+                    <div class="editor-controls">
+                        <button id="runBtn" class="btn btn-primary">
+                            <svg class="btn-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                            </svg>
+                            Run Code
+                        </button>
+                        <button id="aiBtn" class="btn btn-secondary">
+                            <svg class="btn-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 2L3 7v11h14V7l-7-5zM8 15v-3h4v3H8z"/>
+                            </svg>
+                            AI Help
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">Practice Setup</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Your Level</label>
+                        <select id="skillLevel">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Experience (Years)</label>
+                        <select id="experience">
+                            <option value="0-1">0-1 Years</option>
+                            <option value="1-3">1-3 Years</option>
+                            <option value="3-5">3-5 Years</option>
+                            <option value="5+">5+ Years</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Focus Area</label>
+                        <select id="focusArea">
+                            <option value="basics">Language Basics</option>
+                            <option value="algorithms">Algorithms</option>
+                            <option value="datastructures">Data Structures</option>
+                            <option value="problemsolving">Problem Solving</option>
+                            <option value="webdev">Web Development</option>
+                            <option value="backend">Backend Development</option>
+                        </select>
+                    </div>
+                    
+                    <button id="generateQuestionBtn" class="btn btn-primary" style="width: 100%;">
+                        Generate Practice Question
+                    </button>
+                </div>
+
+                <div class="section">
+                    <div class="practice-section">
+                        <h3 class="section-title">Practice Stats</h3>
+                        <div class="practice-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="solvedCount">0</div>
+                                <div class="stat-label">Solved</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="currentStreak">0</div>
+                                <div class="stat-label">Streak</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="accuracy">0%</div>
+                                <div class="stat-label">Success</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="status-indicator" id="statusIndicator">
+                    <span>Ready</span>
+                </div>
+            </div>
+
+            <div class="workspace">
+                <div class="editor-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Code Editor</h3>
+                        <span id="currentLanguage" class="status-indicator">Python</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="editor-wrapper">
+                            <textarea id="codeEditor"></textarea>
+                        </div>
+                        <div class="stdin-section">
+                            <label class="form-label">Program Input</label>
+                            <textarea id="stdinInput" class="stdin-input" placeholder="Enter input for your program here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="output-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Output Terminal</h3>
+                        <button id="clearOutputBtn" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;">Clear</button>
+                    </div>
+                    <div class="panel-content">
+                        <div class="output-content" id="outputContent">Welcome to Evolv! Write your code and click Run to execute.</div>
+                        <div class="loading-state" id="loadingState">
+                            <div class="loading-spinner"></div>
+                            <span>Executing code...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-panel" id="questionPanel" style="display: none;">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Practice Question</h3>
+                        <div>
+                            <button id="nextQuestionBtn" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; margin-right: 8px;">Next</button>
+                            <button id="hideQuestionBtn" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;">Hide</button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="question-content" id="questionContent"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="aiModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">AI Coding Assistant</h2>
+                <button class="modal-close" id="aiModalClose">&times;</button>
+            </div>
+            <textarea id="aiInput" class="ai-input" placeholder="Ask me to help with your code, debug errors, explain concepts, or generate new code...
+
+Examples:
+• Debug my code
+• Write a function to sort an array
+• Explain this algorithm
+• Fix syntax errors
+• Optimize my solution"></textarea>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button id="aiSendBtn" class="btn btn-primary">Send to AI</button>
+            </div>
+            <div id="aiResponse" class="ai-response"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/rust/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/ruby/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/php/php.min.js"></script>
+
+    <script>
+        class EvolvApp {
+    constructor() {
+        this.geminiApiKey = 'AIzaSyAJ5cAvR_-I_4E8TfHvpLQe-jDYDLtopg4';
+        this.stats = {
+            solved: 0,
+            streak: 0,
+            total: 0,
+            correct: 0
+        };
+        
+        this.languageConfig = {
+            python: { version: "3.10.0", mode: "python" },
+            cpp: { version: "10.2.0", mode: "text/x-c++src" },
+            java: { version: "15.0.2", mode: "text/x-java" },
+            c: { version: "10.2.0", mode: "text/x-csrc" },
+            javascript: { version: "18.15.0", mode: "javascript" },
+            go: { version: "1.16.2", mode: "go" },
+            rust: { version: "1.68.2", mode: "text/x-rustsrc" },
+            ruby: { version: "3.0.1", mode: "ruby" },
+            php: { version: "8.2.3", mode: "text/x-php" },
+            kotlin: { version: "1.8.20", mode: "text/x-kotlin" }
+        };
+
+        this.questionTopics = {
+    beginner: [
+        "print hello world",
+        "add two numbers",
+        "find if number is even or odd",
+        "calculate area of rectangle",
+        "convert temperature units",
+        "count characters in a string",
+        "find maximum of two numbers",
+        "check if year is leap year",
+        "calculate simple interest",
+        "reverse a simple string",
+        "sum of first N natural numbers",
+        "check if number is positive or negative"
+    ],
+    intermediate: [
+        "find factorial of a number",
+        "check if string is palindrome",
+        "find sum of digits in number",
+        "print multiplication table",
+        "find largest element in array",
+        "count vowels in a string",
+        "implement simple calculator",
+        "find GCD of two numbers",
+        "check if number is prime",
+        "sort an array of numbers",
+        "find second largest number",
+        "remove duplicates from array"
+    ],
+    advanced: [
+        "implement binary search",
+        "find longest common subsequence",
+        "solve knapsack problem",
+        "implement quicksort algorithm",
+        "find shortest path in graph",
+        "dynamic programming fibonacci",
+        "implement hash table",
+        "solve tower of hanoi",
+        "find strongly connected components",
+        "implement trie data structure",
+        "solve n-queens problem",
+        "implement dijkstra's algorithm"
+    ]
+};
+        this.init();
+    }
+
+    init() {
+        this.setupEditor();
+        this.setupEventListeners();
+        this.loadStats();
+        this.updateStatsDisplay();
+        this.loadCode();
+    }
+
+    setupEditor() {
+        this.editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+            lineNumbers: true,
+            mode: 'python',
+            theme: 'default',
+            tabSize: 4,
+            lineWrapping: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            styleActiveLine: true,
+            extraKeys: {
+                "Ctrl-Enter": () => this.runCode(),
+                "Cmd-Enter": () => this.runCode(),
+                "Ctrl-S": (cm) => this.saveCode(),
+                "Cmd-S": (cm) => this.saveCode()
+            }
+        });
+    }
+
+    setupEventListeners() {
+        document.getElementById('language').addEventListener('change', (e) => {
+            const language = e.target.value;
+            const mode = this.languageConfig[language]?.mode || 'text/plain';
+            this.editor.setOption('mode', mode);
+            document.getElementById('currentLanguage').textContent = language.charAt(0).toUpperCase() + language.slice(1);
+            this.saveCode();
+        });
+
+        document.getElementById('runBtn').addEventListener('click', () => this.runCode());
+        document.getElementById('aiBtn').addEventListener('click', () => this.openAIModal());
+        document.getElementById('clearOutputBtn').addEventListener('click', () => this.clearOutput());
+        
+        document.getElementById('generateQuestionBtn').addEventListener('click', () => this.generateAIQuestion());
+        document.getElementById('nextQuestionBtn').addEventListener('click', () => this.generateAIQuestion());
+        document.getElementById('hideQuestionBtn').addEventListener('click', () => this.hideQuestion());
+
+        document.getElementById('aiModalClose').addEventListener('click', () => this.closeAIModal());
+        document.getElementById('aiSendBtn').addEventListener('click', () => this.sendToAI());
+
+        document.getElementById('aiModal').addEventListener('click', (e) => {
+            if (e.target.id === 'aiModal') this.closeAIModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') this.closeAIModal();
+        });
+
+        this.editor.on('changes', () => this.saveCode());
+    }
+
+    async runCode() {
+        const code = this.editor.getValue().trim();
+        if (!code) {
+            this.showOutput('Error: Please write some code first!');
+            return;
+        }
+
+        this.setStatus('running', 'Executing...');
+        this.showLoading(true);
+
+        try {
+            const language = document.getElementById('language').value;
+            const stdin = document.getElementById('stdinInput').value;
+            const result = await this.executeCode(code, language, stdin);
+            this.processExecutionResult(result);
+            this.setStatus('success', 'Execution Complete');
+        } catch (error) {
+            this.showOutput(`Error: ${error.message}`);
+            this.setStatus('error', 'Execution Failed');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async executeCode(code, language, stdin) {
+        const config = this.languageConfig[language];
+        if (!config) throw new Error('Unsupported language');
+
+        const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                language,
+                version: config.version,
+                files: [{ content: code }],
+                stdin: stdin || ''
+            })
+        });
+
+        if (!response.ok) throw new Error('Failed to execute code');
+        return await response.json();
+    }
+
+    processExecutionResult(result) {
+        if (!result.run) {
+            this.showOutput('Error: Failed to execute code');
+            return;
+        }
+
+        let output = [];
+
+        if (result.compile?.stderr) {
+            output.push(`Compilation Error:\n${result.compile.stderr.trim()}`);
+        }
+
+        if (result.run.stdout) {
+            output.push(`Output:\n${result.run.stdout.trim()}`);
+        }
+
+        if (result.run.stderr) {
+            output.push(`Runtime Error:\n${result.run.stderr.trim()}`);
+        }
+
+        const finalOutput = output.join('\n\n') || 'Program executed successfully with no output.';
+        this.showOutput(finalOutput);
+    }
+
+    showOutput(content) {
+        document.getElementById('outputContent').textContent = content;
+    }
+
+    clearOutput() {
+        document.getElementById('outputContent').textContent = 'Output cleared. Ready for next execution.';
+    }
+
+    showLoading(show) {
+        const loadingState = document.getElementById('loadingState');
+        const outputContent = document.getElementById('outputContent');
+        
+        if (show) {
+            loadingState.style.display = 'flex';
+            outputContent.style.display = 'none';
+        } else {
+            loadingState.style.display = 'none';
+            outputContent.style.display = 'block';
+        }
+    }
+
+    setStatus(type, message) {
+        const statusIndicator = document.getElementById('statusIndicator');
+        statusIndicator.className = `status-indicator status-${type}`;
+        statusIndicator.textContent = message;
+    }
+
+    async generateAIQuestion() {
+        this.setStatus('running', 'Generating question...');
+        
+        try {
+            const level = document.getElementById('skillLevel').value;
+            const experience = document.getElementById('experience').value;
+            const focusArea = document.getElementById('focusArea').value;
+            const currentLanguage = document.getElementById('language').value;
+            
+            const topics = this.questionTopics[level] || this.questionTopics.beginner;
+            const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+            const randomComplexity = Math.floor(Math.random() * 3) + 1;
+            
+            const questionPrompt = this.buildQuestionPrompt(level, experience, focusArea, currentLanguage, randomTopic, randomComplexity);
+            
+            const question = await this.callGeminiForQuestion(questionPrompt);
+            this.displayGeneratedQuestion(question, level);
+            document.getElementById('questionPanel').style.display = 'block';
+            this.setStatus('success', 'Question generated');
+        } catch (error) {
+            this.setStatus('error', 'Failed to generate question');
+            this.showOutput(`Failed to generate question: ${error.message}`);
+        }
+    }
+
+    buildQuestionPrompt(level, experience, focusArea, language, topic, complexity) {
+    const difficultyGuidelines = {
+        beginner: 'very simple, requiring only basic syntax and 5-15 lines of code',
+        intermediate: 'moderately challenging, using standard algorithms and 15-30 lines of code',
+        advanced: 'complex problem requiring advanced techniques and 30+ lines of code'
+    };
+
+    const experienceGuidelines = {
+        '0-1': 'Assume minimal programming experience. Use very basic concepts only.',
+        '1-3': 'Assume some familiarity with basic programming concepts.',
+        '3-5': 'Can use more advanced language features and algorithms.',
+        '5+': 'Can handle complex algorithms and design patterns.'
+    };
+
+    return `Generate a ${level} coding problem about: ${topic}
+
+Skill Level: ${level} - make it ${difficultyGuidelines[level]}
+Experience: ${experience} - ${experienceGuidelines[experience]}
+Focus Area: ${focusArea}
+Programming Language: ${language}
+
+IMPORTANT: For ${level} level, make the problem:
+- ${level === 'beginner' ? 'Very simple, using only basic input/output, variables, and simple operations' : ''}
+- ${level === 'intermediate' ? 'Moderately challenging but still straightforward' : ''}
+- ${level === 'advanced' ? 'Complex and challenging' : ''}
+
+Format:
+TITLE: [Simple, clear title]
+DIFFICULTY: ${level}
+DESCRIPTION: [Clear problem in 2-3 sentences maximum]
+EXAMPLES: [1-2 simple input/output examples]
+CONSTRAINTS: [Basic constraints only]
+HINTS: [1 helpful hint]
+
+Keep it practical and achievable for ${experience} experience level.`;
+}
+
+    getRandomContext() {
+        const contexts = [
+            "a gaming scenario",
+            "a real-world business problem",
+            "a scientific calculation",
+            "a social media application feature",
+            "an e-commerce platform function",
+            "a file system operation",
+            "a network protocol simulation",
+            "a mathematical puzzle",
+            "a data analysis task",
+            "a web application backend feature",
+            "a mobile app functionality",
+            "a database query optimization",
+            "a machine learning preprocessing step",
+            "a cybersecurity validation",
+            "an IoT device simulation"
+        ];
+        return contexts[Math.floor(Math.random() * contexts.length)];
+    }
+
+    async callGeminiForQuestion(prompt) {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent?key=${this.geminiApiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: prompt
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.9,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 1024,
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Failed to generate question');
+        }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+    }
+
+    displayGeneratedQuestion(questionText, difficulty) {
+        const parsedQuestion = this.parseQuestionResponse(questionText, difficulty);
+        const questionContent = document.getElementById('questionContent');
+        
+        questionContent.innerHTML = `
+            <div class="question-card">
+                <div class="question-title">${parsedQuestion.title}</div>
+                <div class="question-difficulty difficulty-${difficulty}">${difficulty.toUpperCase()}</div>
+                <div class="question-description">${parsedQuestion.description}</div>
+                <div class="question-example">${parsedQuestion.examples}</div>
+                ${parsedQuestion.constraints ? `<div class="question-example" style="margin-top: 8px;"><strong>Constraints:</strong><br>${parsedQuestion.constraints}</div>` : ''}
+                ${parsedQuestion.hints ? `<div class="question-example" style="margin-top: 8px; background: rgba(59, 130, 246, 0.05);"><strong>Hints:</strong><br>${parsedQuestion.hints}</div>` : ''}
+            </div>
+        `;
+    }
+
+    parseQuestionResponse(text, difficulty) {
+        const titleMatch = text.match(/TITLE:\s*(.+)/i);
+        const descriptionMatch = text.match(/DESCRIPTION:\s*([\s\S]+?)(?=EXAMPLES:|CONSTRAINTS:|HINTS:|$)/i);
+        const examplesMatch = text.match(/EXAMPLES:\s*([\s\S]+?)(?=CONSTRAINTS:|HINTS:|$)/i);
+        const constraintsMatch = text.match(/CONSTRAINTS:\s*([\s\S]+?)(?=HINTS:|$)/i);
+        const hintsMatch = text.match(/HINTS:\s*([\s\S]+?)$/i);
+
+        return {
+            title: titleMatch ? titleMatch[1].trim() : `Coding Challenge - ${difficulty}`,
+            description: descriptionMatch ? descriptionMatch[1].trim() : text.substring(0, 200) + '...',
+            examples: examplesMatch ? examplesMatch[1].trim() : 'Examples will be provided in the problem description.',
+            constraints: constraintsMatch ? constraintsMatch[1].trim() : null,
+            hints: hintsMatch ? hintsMatch[1].trim() : null
+        };
+    }
+
+    hideQuestion() {
+        document.getElementById('questionPanel').style.display = 'none';
+    }
+
+    openAIModal() {
+        document.getElementById('aiModal').classList.add('show');
+        document.getElementById('aiInput').focus();
+    }
+
+    closeAIModal() {
+        document.getElementById('aiModal').classList.remove('show');
+        document.getElementById('aiResponse').style.display = 'none';
+    }
+
+    async sendToAI() {
+        const userInput = document.getElementById('aiInput').value.trim();
+        if (!userInput) return;
+
+        const currentCode = this.editor.getValue();
+        const currentLanguage = document.getElementById('language').value;
+
+        document.getElementById('aiSendBtn').disabled = true;
+        this.showAILoading();
+
+        try {
+            const response = await this.callGeminiAPI(userInput, currentCode, currentLanguage);
+            this.displayAIResponse(response, userInput);
+        } catch (error) {
+            this.displayAIResponse(`Error: ${error.message}`, userInput, true);
+        } finally {
+            document.getElementById('aiSendBtn').disabled = false;
+        }
+    }
+
+    async callGeminiAPI(userPrompt, currentCode, currentLanguage) {
+        const systemPrompt = `You are a coding assistant. The user is working with ${currentLanguage} code.
+        
+Current code in editor:
+${currentCode || "No code in editor"}
+
+Instructions:
+- If user asks to debug, fix, or modify existing code, provide the complete corrected code
+- If user asks to write new code, provide complete working code
+- If user asks for explanations, provide clear explanations
+- Always provide clean, working code without unnecessary comments
+- Format code properly for the specified language
+- Only return code that should replace the editor content when user asks for code generation/fixing`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent?key=${this.geminiApiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: `${systemPrompt}\n\nUser request: ${userPrompt}`
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 2048,
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Failed to get AI response');
+        }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+    }
+
+    showAILoading() {
+        const aiResponse = document.getElementById('aiResponse');
+        aiResponse.style.display = 'block';
+        aiResponse.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; color: var(--primary-blue);">
+                <div class="loading-spinner" style="width: 16px; height: 16px; margin: 0;"></div>
+                <span>AI is thinking...</span>
+            </div>
+        `;
+    }
+
+    displayAIResponse(response, userPrompt, isError = false) {
+    const aiResponse = document.getElementById('aiResponse');
+    aiResponse.style.display = 'block';
+    
+
+    if (!isError && this.isCodeGenerationRequest(userPrompt)) {
+        const codeMatches = response.match(/```(?:\w+)?\n([\s\S]*?)```/g);
+        if (codeMatches && codeMatches.length > 0) {
+            const extractedCode = codeMatches[0].replace(/```(?:\w+)?\n/, '').replace(/```$/, '').trim();
+            if (extractedCode) {
+                this.editor.setValue(extractedCode);
+                this.setStatus('success', 'Code updated by AI');
+
+                aiResponse.innerHTML = `
+                    <div style="color: var(--success-color); line-height: 1.6; text-align: center; padding: 20px;">
+                        <strong>✓ Your code is ready!</strong><br>
+                        <span style="font-size: 0.875rem; color: var(--text-muted);">The code has been updated in your editor</span>
+                    </div>
+                `;
+                return;
+            }
+        }
+    }
+    
+    aiResponse.innerHTML = `
+        <div style="color: ${isError ? 'var(--error-color)' : 'var(--text-primary)'}; line-height: 1.6;">
+            ${this.formatAIResponse(response)}
+        </div>
+    `;
+}
+
+    formatAIResponse(response) {
+        return response
+            .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre style="background: var(--bg-secondary); padding: 12px; border-radius: 6px; margin: 8px 0; overflow-x: auto; border: 1px solid var(--border-light);"><code>$2</code></pre>')
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    }
+
+    isCodeGenerationRequest(prompt) {
+        const codeKeywords = [
+            'write', 'create', 'generate', 'make', 'build', 'code', 'function',
+            'class', 'method', 'algorithm', 'program', 'script', 'debug', 'fix',
+            'correct', 'modify', 'change', 'update', 'improve', 'optimize', 'refactor'
+        ];
+        return codeKeywords.some(keyword => prompt.toLowerCase().includes(keyword));
+    }
+
+    saveCode() {
+        try {
+            const state = {
+                code: this.editor.getValue(),
+                language: document.getElementById('language').value,
+                stdin: document.getElementById('stdinInput').value,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('Evolv_state', JSON.stringify(state));
+        } catch (error) {
+            console.error('Failed to save code:', error);
+        }
+    }
+
+    loadCode() {
+        try {
+            const saved = localStorage.getItem('Evolv_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                this.editor.setValue(state.code || '');
+                document.getElementById('language').value = state.language || 'python';
+                document.getElementById('stdinInput').value = state.stdin || '';
+                
+                const mode = this.languageConfig[state.language || 'python']?.mode || 'python';
+                this.editor.setOption('mode', mode);
+                document.getElementById('currentLanguage').textContent = (state.language || 'python').charAt(0).toUpperCase() + (state.language || 'python').slice(1);
+            }
+        } catch (error) {
+            console.error('Failed to load code:', error);
+        }
+    }
+
+    loadStats() {
+        try {
+            const saved = localStorage.getItem('Evolv_stats');
+            if (saved) {
+                this.stats = { ...this.stats, ...JSON.parse(saved) };
+            }
+        } catch (error) {
+            console.error('Failed to load stats:', error);
+        }
+    }
+
+    saveStats() {
+        try {
+            localStorage.setItem('Evolv_stats', JSON.stringify(this.stats));
+        } catch (error) {
+            console.error('Failed to save stats:', error);
+        }
+    }
+
+    updateStatsDisplay() {
+        document.getElementById('solvedCount').textContent = this.stats.solved;
+        document.getElementById('currentStreak').textContent = this.stats.streak;
+        const accuracy = this.stats.total > 0 ? Math.round((this.stats.correct / this.stats.total) * 100) : 0;
+        document.getElementById('accuracy').textContent = `${accuracy}%`;
+    }
+
+    updateStats(solved = false) {
+        this.stats.total++;
+        if (solved) {
+            this.stats.solved++;
+            this.stats.correct++;
+            this.stats.streak++;
+        } else {
+            this.stats.streak = 0;
+        }
+        this.saveStats();
+        this.updateStatsDisplay();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = new EvolvApp();
+});
+    </script>
+</body>
+</html>
