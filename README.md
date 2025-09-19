@@ -1,8 +1,5 @@
-# Evolv-Ai
-Ai for students
 
-
-# Evolv - AI-Powered Career & Skills Advisor
+# Evolv : AI-Powered Career & Skills Advisor
 
 A personalized AI-powered platform that provides career guidance, skills analysis, roadmap generation, coding practice, and resume building to help professionals accelerate their career growth.
 
