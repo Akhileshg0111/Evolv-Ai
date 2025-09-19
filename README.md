@@ -34,7 +34,7 @@ Before running this project, make sure you have:
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repository-url>
+   git clone https://github.com/Akhileshg0111/Evolv-Ai.git
    cd evolv-ai
    ```
 
@@ -73,7 +73,7 @@ Before running this project, make sure you have:
 
 ## Google Gemini API Setup
 
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
+1. Go to google cloud console 
 2. Create a new API key
 3. Add your API key to your project configuration
 
